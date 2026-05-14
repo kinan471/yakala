@@ -50,7 +50,7 @@ export function formatPrice(price: number, currency = "TRY"): string {
   return new Intl.NumberFormat("tr-TR", {
     style: "currency",
     currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(price);
 }

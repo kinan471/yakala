@@ -90,16 +90,26 @@ export default function Navbar() {
     timerRef.current = setTimeout(async () => {
       try {
         const terms = query.trim().split(/\s+/).filter(Boolean);
-        let s = supabase.from("products").select("*").eq("is_active", true).limit(6);
-        
-        terms.forEach(t => {
-          const norm = normalizeTurkish(t);
-          s = s.or(`title.ilike.%${t}%,title.ilike.%${norm}%,category.ilike.%${t}%`);
-        });
+        if (terms.length === 0) return;
 
-        const { data, error } = await s;
+        // نجلب المنتجات التي تطابق الكلمة الأولى أولاً (أو أي كلمة)
+        // ثم نقوم بالتصفية الذكية محلياً لضمان وجود كل الكلمات (AND)
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("is_active", true)
+          .ilike("title", `%${terms[0]}%`) // فلترة أولية لتقليل البيانات
+          .limit(20);
+
         if (error) throw error;
-        setSuggestions(data || []);
+
+        // تصفية ذكية محلية لضمان وجود كل الكلمات في العنوان أو التصنيف
+        const filtered = (data || []).filter(p => {
+          const text = normalizeTurkish(`${p.title} ${p.category}`);
+          return terms.every(t => text.includes(normalizeTurkish(t)));
+        }).slice(0, 6);
+
+        setSuggestions(filtered);
       } catch (err) {
         console.error("❌ Search error:", err);
         setSuggestions([]);
@@ -203,13 +213,24 @@ export default function Navbar() {
                 <div className="max-h-72 overflow-y-auto">
                   {categories.map((parent) => (
                     <div key={parent}>
-                      <button
-                        onClick={() => setActiveSubCategory(activeSubCategory === parent ? null : parent)}
-                        className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 flex items-center justify-between"
-                      >
-                        {parent}
-                        {hierarchy[parent]?.length > 0 && <span className="text-[10px]">▶</span>}
-                      </button>
+                      <div className="flex items-center hover:bg-orange-50 group">
+                        <button
+                          onClick={() => handleCategorySelect(parent)}
+                          className="flex-1 text-left px-4 py-2.5 text-sm font-bold text-gray-700 group-hover:text-orange-600"
+                        >
+                          {parent}
+                        </button>
+                        {hierarchy[parent]?.length > 0 && (
+                          <button 
+                            onClick={() => setActiveSubCategory(activeSubCategory === parent ? null : parent)}
+                            className="p-2.5 text-gray-400 hover:text-orange-600 transition-transform"
+                          >
+                            <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" className={activeSubCategory === parent ? "rotate-180" : "rotate-90"}>
+                              <path d="M2 4l4 4 4-4" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                       {activeSubCategory === parent && hierarchy[parent]?.map((child) => (
                         <button
                           key={child}
