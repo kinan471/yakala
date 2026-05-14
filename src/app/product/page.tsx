@@ -1,4 +1,6 @@
 "use client";
+// Build fix: Re-triggering deployment with CountdownTimer component included.
+
 import { useEffect, useState } from "react";
 import { supabase, formatPrice, getDiscountPercent, Product } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
