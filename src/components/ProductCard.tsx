@@ -36,7 +36,7 @@ export default function ProductCard({
       : `https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800`;
 
   return (
-    <div className={`group relative flex flex-col h-full bg-white rounded-3xl overflow-hidden transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-2 border border-gray-100 ${variant === "featured" ? "ring-2 ring-orange-500" : ""}`}>
+    <div className={`group relative flex flex-col h-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-2 border border-gray-100 ${variant === "featured" ? "ring-2 ring-orange-500" : ""}`}>
       
       {/* 1. TOP BADGES */}
       <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
@@ -77,7 +77,7 @@ export default function ProductCard({
       </Link>
 
       {/* 3. CONTENT SECTION */}
-      <div className="flex flex-col flex-1 p-5 gap-4">
+      <div className="flex flex-col flex-1 p-3 sm:p-5 gap-2 sm:gap-4">
         
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{product.category.split(">")[0]}</span>
@@ -93,12 +93,12 @@ export default function ProductCard({
           </h3>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="flex flex-col">
-            <span className="text-xs text-gray-400 line-through decoration-rose-400/50">{formatPrice(product.original_price, product.currency)}</span>
-            <span className="text-2xl font-black text-gray-900 tracking-tight">{formatPrice(product.current_price, product.currency)}</span>
+            <span className="text-[10px] text-gray-400 line-through decoration-rose-400/50">{formatPrice(product.original_price, product.currency)}</span>
+            <span className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight">{formatPrice(product.current_price, product.currency)}</span>
           </div>
-          <div className="ml-auto bg-orange-100 text-orange-600 font-black text-lg px-3 py-2 rounded-2xl shadow-sm">
+          <div className="ml-auto bg-orange-100 text-orange-600 font-black text-sm sm:text-lg px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-sm">
             %{discount}
           </div>
         </div>
@@ -120,10 +120,10 @@ export default function ProductCard({
         </div>
 
         {/* CTA SECTION */}
-        <div className="mt-auto pt-2 flex gap-2">
+        <div className="mt-auto pt-1 sm:pt-2 flex gap-1.5 sm:gap-2">
           <Link 
             href={`/compare?p1=${product.id}`}
-            className="flex-1 bg-white text-gray-700 border-2 border-gray-100 text-[11px] font-bold py-4 rounded-2xl text-center hover:border-orange-500 hover:text-orange-500 transition-all active:scale-95"
+            className="flex-1 bg-white text-gray-700 border-2 border-gray-100 text-[10px] font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl text-center hover:border-orange-500 hover:text-orange-500 transition-all active:scale-95"
           >
             Karşılaştır
           </Link>
@@ -131,9 +131,9 @@ export default function ProductCard({
             href={product.affiliate_link || product.source_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-[1.5] bg-orange-600 text-white text-xs font-black py-4 rounded-2xl text-center shadow-[0_10px_20px_rgba(234,88,12,0.3)] hover:bg-orange-500 transition-all active:scale-95 flex items-center justify-center gap-2"
+            className="flex-[1.5] bg-orange-600 text-white text-[10px] sm:text-xs font-black py-3 sm:py-4 rounded-xl sm:rounded-2xl text-center shadow-[0_10px_20px_rgba(234,88,12,0.3)] hover:bg-orange-500 transition-all active:scale-95 flex items-center justify-center gap-1 sm:gap-2"
           >
-            HEMEN YAKALA 🚀
+            YAKALA
           </a>
         </div>
       </div>

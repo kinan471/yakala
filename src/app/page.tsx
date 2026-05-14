@@ -33,7 +33,7 @@ export default async function HomePage() {
   const featuredProducts = allProducts.filter((p) => p.is_featured);
 
   return (
-    <div className="min-h-screen pt-24 sm:pt-28 bg-[#F8F9FA]">
+    <div className="min-h-screen pt-16 sm:pt-24 bg-[#F8F9FA]">
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
         
         {/* ========== FEATURED SLIDER (Banner) ========== */}
@@ -49,7 +49,7 @@ export default async function HomePage() {
 
           {/* ========== PRODUCT LIST WITH SEARCH ========== */}
           <section id="products">
-            <Suspense fallback={<div className="py-20 text-center font-bold text-gray-400">Yükleniyor...</div>}>
+            <Suspense fallback={<div className="py-10 text-center font-bold text-gray-400">Yükleniyor...</div>}>
               <ClientProductList initialProducts={allProducts} />
             </Suspense>
           </section>

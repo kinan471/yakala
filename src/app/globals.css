@@ -362,17 +362,40 @@ body {
 }
 .marquee-inner { animation: marquee 25s linear infinite; display: inline-block; }
 
-/* Mobile */
+/* ============ MOBILE RESPONSIVE ============ */
 @media (max-width: 640px) {
-  .price-current { font-size: 1.2rem; }
-  .social-popup { left: 12px; right: 12px; max-width: none; }
-  
+  /* Prices */
+  .price-current { font-size: 1.1rem; }
+
+  /* Social popup full-width */
+  .social-popup { left: 10px; right: 10px; max-width: none; bottom: 16px; }
+
+  /* Reduce section vertical padding */
+  section { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
+
+  /* Product cards: tighter padding */
+  .product-card { border-radius: 12px; }
+
+  /* Admin cards */
+  .admin-card { padding: 1rem; border-radius: 12px; }
+
+  /* Scarcity bar */
+  .scarcity-bar { height: 6px; }
+
+  /* Headings in product list */
+  h2.text-3xl { font-size: 1.5rem !important; }
+
+  /* Featured slider content padding */
   .mobile-slider-card {
     padding: 1rem !important;
-    min-height: 400px;
+    min-height: 340px;
   }
-  
+
   .mobile-slider-image {
     aspect-ratio: 4/3 !important;
   }
+
+  /* Countdown timer blocks */
+  .countdown-block { min-width: 36px; padding: 0.2rem 0.4rem; }
+  .countdown-num { font-size: 0.95rem; }
 }

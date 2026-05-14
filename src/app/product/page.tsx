@@ -57,7 +57,7 @@ export default function ProductPage() {
     <main className="min-h-screen bg-gray-50 pb-20">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24">
         {/* Breadcrumbs */}
         <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-8">
           <Link href="/" className="hover:text-orange-500 transition-colors">Ana Sayfa</Link>
@@ -89,7 +89,7 @@ export default function ProductPage() {
                 </div>
               </div>
               
-              <h1 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-4">
                 {product.title}
               </h1>
               
@@ -99,13 +99,13 @@ export default function ProductPage() {
             </div>
 
             {/* Pricing Section */}
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+            <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm space-y-4 sm:space-y-6">
               <div className="flex items-end gap-4">
                 <div>
                   <div className="text-gray-400 line-through text-lg font-medium">
                     {formatPrice(product.original_price, product.currency)}
                   </div>
-                  <div className="text-orange-500 text-5xl font-black font-poppins">
+                  <div className="text-orange-500 text-4xl sm:text-5xl font-black font-poppins">
                     {formatPrice(product.current_price, product.currency)}
                   </div>
                 </div>
@@ -132,7 +132,7 @@ export default function ProductPage() {
                 <Link 
                   href={product.affiliate_link || product.source_url || "#"} 
                   target="_blank"
-                  className="btn-yakala w-full py-5 text-xl flex items-center justify-center gap-3 shadow-xl shadow-orange-100"
+                  className="btn-yakala w-full py-4 sm:py-5 text-lg sm:text-xl flex items-center justify-center gap-2 sm:gap-3 shadow-xl shadow-orange-100"
                 >
                   🎯 Şimdi Yakala
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">

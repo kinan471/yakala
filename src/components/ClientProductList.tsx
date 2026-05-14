@@ -41,10 +41,10 @@ export default function ClientProductList({ initialProducts }: { initialProducts
   }, [searchQuery, initialProducts]);
 
   return (
-    <section id="products" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-center mb-10 text-center w-full">
+    <section id="products" className="py-8 sm:py-16 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-center mb-6 sm:mb-10 text-center w-full">
         <div>
-          <h2 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
             {searchQuery ? `"${searchQuery}" için sonuçlar` : "Tüm Fırsatlar"}
           </h2>
         </div>
@@ -57,7 +57,7 @@ export default function ClientProductList({ initialProducts }: { initialProducts
           <p className="text-gray-500 mt-3 font-medium max-w-xs mx-auto">Aradığınız kriterlere uygun ürün şu an için mevcut değil. Başka bir kelime deneyebilirsiniz.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
