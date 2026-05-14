@@ -264,7 +264,7 @@ export default function AdminDashboard() {
                     <th className="text-left text-[10px] text-gray-400 font-black uppercase tracking-widest pb-3 pr-4">Fiyat</th>
                     <th className="text-left text-[10px] text-gray-400 font-black uppercase tracking-widest pb-3 pr-4">İstatistik</th>
                     <th className="text-left text-[10px] text-gray-400 font-black uppercase tracking-widest pb-3 pr-4">Öne Çıkar</th>
-                    <th className="text-left text-[10px] text-gray-400 font-black uppercase tracking-widest pb-3">İşlemler</th>
+                    <th className="text-center text-[10px] text-gray-400 font-black uppercase tracking-widest pb-3">İşlemler</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -347,13 +347,19 @@ export default function AdminDashboard() {
 
                         {/* Actions */}
                         <td className="py-3">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-2">
+                            <Link
+                              href={`/admin/edit-product/${product.id}`}
+                              className="text-[10px] px-3 py-2 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-100 font-black uppercase tracking-widest transition-all"
+                            >
+                              Düzenle
+                            </Link>
                             <button
                               onClick={() => toggleActive(product)}
-                              className={`text-xs px-2.5 py-1.5 rounded-lg font-semibold transition-all ${
+                              className={`text-[10px] px-3 py-2 rounded-xl font-black uppercase tracking-widest transition-all ${
                                 product.is_active
-                                  ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                                  : "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                                  ? "bg-amber-50 text-amber-600 border border-amber-100 hover:bg-amber-100"
+                                  : "bg-green-50 text-green-600 border border-green-100 hover:bg-green-100"
                               }`}
                             >
                               {product.is_active ? "Gizle" : "Göster"}
@@ -361,7 +367,7 @@ export default function AdminDashboard() {
                             <button
                               onClick={() => handleDelete(product.id)}
                               disabled={deleteId === product.id}
-                              className="text-[10px] px-3 py-2 rounded-xl bg-gray-100 text-gray-400 border border-gray-200 hover:text-red-500 hover:border-red-200 font-black uppercase tracking-widest transition-all"
+                              className="text-[10px] px-3 py-2 rounded-xl bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 font-black uppercase tracking-widest transition-all"
                             >
                               {deleteId === product.id ? "..." : "Sil"}
                             </button>
