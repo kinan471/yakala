@@ -13,6 +13,15 @@ export default async function ComparePage({
   const p2Name = params.p2Name;
 
   // Fetch all active products
+  if (!supabase) {
+    console.warn("Supabase client is not initialized.");
+    return (
+      <div className="min-h-screen pt-24 text-center font-bold text-gray-400">
+        Yapılandırma hatası. Lütfen sistem yöneticisine danışın.
+      </div>
+    );
+  }
+
   const { data } = await supabase
     .from("products")
     .select("*")

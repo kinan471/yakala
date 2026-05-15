@@ -16,6 +16,11 @@ const CATCH_CONFIG = {
 };
 
 async function getProducts() {
+  if (!supabase) {
+    console.warn("Supabase client is not initialized. Check your environment variables.");
+    return [];
+  }
+
   const { data, error } = await supabase
     .from("products")
     .select("*")
