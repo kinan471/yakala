@@ -73,6 +73,30 @@ CREATE TRIGGER products_updated_at
   BEFORE UPDATE ON products
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+-- Settings Table for Admin Control
+CREATE TABLE IF NOT EXISTS site_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  key TEXT UNIQUE NOT NULL,
+  value TEXT NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS for settings
+ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Settings publicly readable" ON site_settings;
+CREATE POLICY "Settings publicly readable" ON site_settings
+  FOR SELECT TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "Settings editable by admin" ON site_settings;
+CREATE POLICY "Settings editable by admin" ON site_settings
+  FOR ALL TO anon, authenticated USING (true); -- Note: In production, restrict this to a secret role
+
+-- Initial Data
+INSERT INTO site_settings (key, value) 
+VALUES ('marquee_text', '🔥 En büyük indirimler — ⚡ Günlük fırsatlar — 💸 Kaçırılmayacak kampanyalar — ⏳ Fiyatlar anlık değişebilir')
+ON CONFLICT (key) DO NOTHING;
+
 -- =============================================
 -- END OF SCHEMA
 -- =============================================

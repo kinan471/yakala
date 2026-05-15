@@ -210,38 +210,65 @@ export default function Navbar() {
                 >
                   KATEGORİLER
                 </button>
-                <div className="max-h-72 overflow-y-auto">
-                  {categories.map((parent) => (
-                    <div key={parent}>
-                      <div className="flex items-center hover:bg-orange-50 group">
-                        <button
-                          onClick={() => handleCategorySelect(parent)}
-                          className="flex-1 text-left px-4 py-2.5 text-sm font-bold text-gray-700 group-hover:text-orange-600"
-                        >
-                          {parent}
-                        </button>
-                        {hierarchy[parent]?.length > 0 && (
-                          <button 
-                            onClick={() => setActiveSubCategory(activeSubCategory === parent ? null : parent)}
-                            className="p-2.5 text-gray-400 hover:text-orange-600 transition-transform"
+                <div className="max-h-[70vh] overflow-y-auto custom-scrollbar">
+                  {categories.map((parent) => {
+                    const hasSub = hierarchy[parent]?.length > 0;
+                    const isActive = activeSubCategory === parent;
+
+                    return (
+                      <div key={parent} className="border-b border-gray-50 last:border-0">
+                        <div className="flex items-center hover:bg-orange-50 group transition-colors">
+                          <button
+                            onClick={() => {
+                              if (hasSub) {
+                                setActiveSubCategory(isActive ? null : parent);
+                              } else {
+                                handleCategorySelect(parent);
+                              }
+                            }}
+                            className="flex-1 text-left px-5 py-4 text-sm font-bold text-gray-700 group-hover:text-orange-600 flex items-center justify-between"
                           >
-                            <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" className={activeSubCategory === parent ? "rotate-180" : "rotate-90"}>
-                              <path d="M2 4l4 4 4-4" />
-                            </svg>
+                            <span>{parent}</span>
+                            {hasSub && (
+                              <svg 
+                                width="12" 
+                                height="12" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="3" 
+                                className={`transition-all duration-300 ${isActive ? "rotate-180 text-orange-500" : "rotate-0 text-gray-300"}`}
+                              >
+                                <path d="M2 4l4 4 4-4" />
+                              </svg>
+                            )}
                           </button>
+                        </div>
+
+                        {isActive && hasSub && (
+                          <div className="bg-gray-50/80 py-1 animate-slide-down border-t border-gray-100">
+                            {/* Option to view all products in the parent category */}
+                            <button
+                              onClick={() => handleCategorySelect(parent)}
+                              className="w-full text-left pl-10 pr-5 py-3 text-[13px] font-black text-orange-500/70 hover:text-orange-600 hover:bg-orange-50 transition-colors flex items-center gap-2"
+                            >
+                              <span className="w-1 h-1 rounded-full bg-orange-500" />
+                              Tümünü Gör: {parent}
+                            </button>
+                            
+                            {hierarchy[parent].map((child) => (
+                              <button
+                                key={child}
+                                onClick={() => handleSubCategorySelect(parent, child)}
+                                className="w-full text-left pl-10 pr-5 py-3 text-[13px] font-semibold text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                              >
+                                {child}
+                              </button>
+                            ))}
+                          </div>
                         )}
                       </div>
-                      {activeSubCategory === parent && hierarchy[parent]?.map((child) => (
-                        <button
-                          key={child}
-                          onClick={() => handleSubCategorySelect(parent, child)}
-                          className="w-full text-left pl-8 pr-4 py-1.5 text-xs font-medium text-gray-500 hover:text-orange-600 bg-gray-50/50"
-                        >
-                          {child}
-                        </button>
-                      ))}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>

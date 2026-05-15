@@ -2,6 +2,7 @@ import { supabase, Product } from "@/lib/supabase";
 import FeaturedSlider from "@/components/FeaturedSlider";
 import FeaturedGrid from "@/components/FeaturedGrid";
 import ClientProductList from "@/components/ClientProductList";
+import Marquee from "@/components/Marquee";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -33,8 +34,9 @@ export default async function HomePage() {
   const featuredProducts = allProducts.filter((p) => p.is_featured);
 
   return (
-    <div className="min-h-screen pt-16 sm:pt-24 bg-[#F8F9FA]">
-      <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-16 sm:pt-16 bg-[#F8F9FA]">
+      <Marquee />
+      <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 mt-4">
         
         {/* ========== FEATURED SLIDER (Banner) ========== */}
         {featuredProducts.length > 0 && (

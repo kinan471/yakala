@@ -20,14 +20,17 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [featureLoading, setFeatureLoading] = useState<string | null>(null);
+  const [marqueeText, setMarqueeText] = useState("");
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
   const loadData = async () => {
     if (!isAuth) return;
     setLoading(true);
     try {
-      const [productsRes, statsRes] = await Promise.all([
+      const [productsRes, statsRes, settingsRes] = await Promise.all([
         fetch("/api/products"),
         fetch("/api/stats").catch(() => null),
+        fetch("/api/settings").catch(() => null),
       ]);
       const productsData = await productsRes.json();
       setProducts(Array.isArray(productsData) ? productsData : []);
@@ -35,6 +38,11 @@ export default function AdminDashboard() {
       if (statsRes && statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData?.visits !== undefined ? statsData : { visits: 0, products: 0, clicks: 0 });
+      }
+
+      if (settingsRes && settingsRes.ok) {
+        const settings = await settingsRes.json();
+        setMarqueeText(settings.marquee_text || "");
       }
     } catch (e) {
       console.error("Failed to load admin data:", e);
@@ -150,6 +158,24 @@ export default function AdminDashboard() {
     }
   };
 
+  const updateSettings = async (key: string, value: string) => {
+    setSettingsLoading(true);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key, value }),
+      });
+      if (res.ok) {
+        alert("Ayarlar güncellendi!");
+      }
+    } catch (e) {
+      alert("Hata oluştu!");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
       {/* Header */}
@@ -182,6 +208,33 @@ export default function AdminDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Site Settings Section */}
+        <div className="admin-card mb-6 border-l-4 border-l-orange-500 bg-gradient-to-br from-white to-orange-50/20">
+          <h3 className="text-gray-900 font-black text-lg mb-4 flex items-center gap-2">
+            📢 Duyuru Bandı (Marquee)
+          </h3>
+          <div className="flex gap-4">
+            <input
+              type="text"
+              value={marqueeText}
+              onChange={(e) => setMarqueeText(e.target.value)}
+              className="admin-input flex-1 font-medium"
+              placeholder="Duyuru metnini girin..."
+            />
+            <button
+              onClick={() => updateSettings("marquee_text", marqueeText)}
+              disabled={settingsLoading}
+              className="px-8 py-3 bg-gray-900 text-white rounded-2xl text-sm font-black hover:bg-black transition-all disabled:opacity-50"
+            >
+              {settingsLoading ? "..." : "Kaydet"}
+            </button>
+          </div>
+          <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-3 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+            Bu metin sayfanın en üstünde kayan yazı olarak görünecektir.
+          </p>
+        </div>
+
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           {[

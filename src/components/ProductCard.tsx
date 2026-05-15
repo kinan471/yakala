@@ -3,18 +3,44 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, memo } from "react";
-import { Product, getDiscountPercent, formatPrice } from "@/lib/supabase";
+import {
+  Product,
+  getDiscountPercent,
+  formatPrice,
+} from "@/lib/supabase";
 
 interface ProductCardProps {
   product: Product;
   variant?: "default" | "featured";
 }
 
-const PLATFORM_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  trendyol: { label: "Trendyol", color: "bg-[#F27A1A]", icon: "🧡" },
-  hepsiburada: { label: "Hepsiburada", color: "bg-[#FF6000]", icon: "🟠" },
-  amazon: { label: "Amazon", color: "bg-[#232F3E]", icon: "📦" },
+const PLATFORM_CONFIG: Record<
+  string,
+  { label: string; color: string; icon: string }
+> = {
+  trendyol: {
+    label: "Trendyol",
+    color: "from-[#F27A1A] to-orange-600",
+    icon: "🧡",
+  },
+  hepsiburada: {
+    label: "Hepsiburada",
+    color: "from-[#FF6000] to-orange-700",
+    icon: "🟠",
+  },
+  amazon: {
+    label: "Amazon",
+    color: "from-[#232F3E] to-black",
+    icon: "📦",
+  },
 };
+
+const persuasionMessages = [
+  "🔥 Bugün en çok görüntülenen ürün",
+  "⚡ Son 1 saatte 24 kişi aldı",
+  "💸 Fiyat düşüşü yeni oldu",
+  "⏳ Stok hızla tükeniyor",
+];
 
 const ProductCard = memo(function ProductCard({
   product,
@@ -22,20 +48,35 @@ const ProductCard = memo(function ProductCard({
 }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
+  const [message, setMessage] = useState("");
 
-  const discount = getDiscountPercent(product.original_price || 0, product.current_price || 0);
-  const savings = (product.original_price || 0) - (product.current_price || 0);
+  const discount = getDiscountPercent(
+    product.original_price || 0,
+    product.current_price || 0
+  );
 
-  // حل مشكلة Hydration لعداد المشاهدات العشوائي
+  const savings =
+    (product.original_price || 0) -
+    (product.current_price || 0);
+
   useEffect(() => {
     setViewerCount(Math.floor(Math.random() * 50) + 15);
+
+    setMessage(
+      persuasionMessages[
+        Math.floor(Math.random() * persuasionMessages.length)
+      ]
+    );
   }, []);
 
-  const platform = PLATFORM_CONFIG[product.source_platform?.toLowerCase()] || {
-    label: product.source_platform || "Mağaza",
-    color: "bg-gray-800",
-    icon: "🔗",
-  };
+  const platform =
+    PLATFORM_CONFIG[
+      product.source_platform?.toLowerCase()
+    ] || {
+      label: product.source_platform || "Mağaza",
+      color: "from-gray-700 to-gray-900",
+      icon: "🔗",
+    };
 
   const imgSrc =
     !imgError && product.images?.length > 0
@@ -44,129 +85,350 @@ const ProductCard = memo(function ProductCard({
 
   return (
     <div
-      className={`group relative flex flex-col h-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-2 border border-gray-100 ${
-        variant === "featured" ? "ring-2 ring-orange-500" : ""
-      }`}
+      className={`
+        group
+        relative
+        flex
+        flex-col
+        h-full
+        overflow-hidden
+        rounded-[28px]
+        border border-orange-100/60
+        bg-gradient-to-b from-white via-white to-orange-50/40
+        shadow-[0_10px_40px_rgba(0,0,0,0.04)]
+        transition-all duration-500 ease-out
+        hover:-translate-y-3
+        hover:rotate-[0.3deg]
+        hover:shadow-[0_25px_70px_rgba(249,115,22,0.18)]
+        ${
+          variant === "featured"
+            ? "ring-2 ring-orange-500"
+            : ""
+        }
+      `}
     >
-      {/* 1. TOP BADGES */}
-      <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
+      {/* Glow */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-[radial-gradient(circle_at_top,rgba(255,115,0,0.12),transparent_60%)] pointer-events-none" />
+
+      {/* TOP BADGES */}
+      <div className="absolute top-3 left-3 z-30 flex flex-col gap-2">
         {product.is_lowest_price && (
-          <div className="bg-emerald-500 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1 animate-pulse">
+          <div className="animate-pulse rounded-full bg-emerald-500 px-4 py-2 text-[10px] font-black text-white shadow-xl">
             🏆 TÜRKİYE'NİN EN UCUZU
           </div>
         )}
+
         {discount >= 40 && (
-          <div className="bg-rose-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg">
+          <div className="rounded-full bg-rose-600 px-4 py-2 text-[10px] font-black text-white shadow-lg">
             🔥 SÜPER FIRSAT
           </div>
         )}
       </div>
 
-      {/* 2. IMAGE SECTION */}
-      <Link href={`/product/${product.id}`} className="relative aspect-square overflow-hidden bg-gray-50 flex items-center justify-center">
+      {/* TREND SCORE */}
+      <div className="absolute top-3 right-3 z-30">
+        <div className="rounded-full bg-black/80 backdrop-blur-md px-3 py-1.5 text-[10px] font-black text-white shadow-xl">
+          🔥 9.8 TREND SCORE
+        </div>
+      </div>
+
+      {/* IMAGE */}
+      <Link
+        href={`/product/${product.id}`}
+        className="
+          relative
+          aspect-square
+          overflow-hidden
+          bg-gradient-to-b
+          from-gray-50
+          to-orange-50/30
+          flex
+          items-center
+          justify-center
+        "
+      >
+        {/* shine */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent z-10" />
+
         <Image
           src={imgSrc}
           alt={product.title}
           fill
-          className="object-contain p-6 transition-transform duration-700 group-hover:scale-110"
+          className="
+            object-contain
+            p-7
+            transition-all
+            duration-700
+            group-hover:scale-110
+            group-hover:rotate-1
+          "
           onError={() => setImgError(true)}
           sizes="(max-width: 640px) 100vw, 300px"
           priority={variant === "featured"}
         />
-        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </Link>
 
-      {/* 3. CONTENT SECTION */}
-      <div className="flex flex-col flex-1 p-3 sm:p-5 gap-2 sm:gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 truncate max-w-[75%]">
-            <span className={`w-2 h-2 rounded-full ${platform.color.replace('bg-', 'bg-')}`} />
-            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest truncate">
-              {platform.label}
-            </span>
-            <span className="text-gray-300">•</span>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">
-              {product.category?.split(">")[0] || "Genel"}
+      {/* CONTENT */}
+      <div className="flex flex-1 flex-col p-4 sm:p-5 gap-4">
+        {/* PLATFORM + RATING */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 max-w-[70%] truncate">
+            <div
+              className={`h-2 w-2 rounded-full bg-gradient-to-r ${platform.color}`}
+            />
+
+            <span className="truncate text-[11px] font-black uppercase tracking-widest text-gray-500">
+              {platform.icon} {platform.label}
             </span>
           </div>
-          <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-lg shrink-0">
-            <span className="text-amber-500 text-xs">★</span>
-            <span className="text-amber-700 text-[10px] font-bold">{product.rating || "4.8"}</span>
+
+          <div className="flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2 py-1 shrink-0">
+            <span>⭐</span>
+
+            <span className="text-xs font-black text-amber-700">
+              {product.rating || "4.9"}
+            </span>
+
+            <span className="text-[10px] text-amber-600">
+              (2.1K)
+            </span>
           </div>
         </div>
 
+        {/* TITLE */}
         <Link href={`/product/${product.id}`}>
-          <h3 className="text-sm sm:text-base font-bold text-gray-800 leading-snug line-clamp-2 min-h-[40px] sm:min-h-[48px] group-hover:text-orange-600 transition-colors">
+          <h3 className="
+            min-h-[52px]
+            text-[15px]
+            sm:text-base
+            leading-snug
+            font-black
+            text-gray-800
+            line-clamp-2
+            transition-colors
+            group-hover:text-orange-600
+          ">
             {product.title}
           </h3>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col">
-            {discount > 0 && (
-              <span className="text-[10px] text-gray-400 line-through decoration-rose-400/50">
-                {formatPrice(product.original_price, product.currency)}
-              </span>
-            )}
-            <span className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight">
-              {formatPrice(product.current_price, product.currency)}
-            </span>
-          </div>
-          
-          {/* Discount Badge - Hidden if 0% */}
+        {/* PERSUASION */}
+        <div className="rounded-2xl border border-orange-100 bg-orange-50 px-3 py-2">
+          <p className="text-[11px] font-bold text-orange-700">
+            {message}
+          </p>
+        </div>
+
+        {/* PRICE */}
+        <div className="space-y-2">
           {discount > 0 && (
-            <div className="ml-auto bg-orange-100 text-orange-600 font-black text-sm sm:text-lg px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-sm">
-              %{discount}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-400 line-through decoration-rose-400">
+                {formatPrice(
+                  product.original_price,
+                  product.currency
+                )}
+              </span>
+
+              <div className="rounded-full bg-rose-100 px-2 py-1 text-[10px] font-black text-rose-600">
+                -%{discount}
+              </div>
             </div>
           )}
+
+          <div className="flex items-end gap-2 flex-wrap">
+            <span className="text-3xl sm:text-4xl font-black tracking-tight text-gray-900">
+              {formatPrice(
+                product.current_price,
+                product.currency
+              )}
+            </span>
+
+            {discount > 0 && (
+              <div className="rounded-xl bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
+                ₺{Math.round(savings)} TASARRUF
+              </div>
+            )}
+          </div>
+
+          <p className="text-xs font-medium text-gray-500">
+            💸 Kullanıcılar bugün ortalama ₺240 daha az ödüyor
+          </p>
+        </div>
+
+        {/* SAVINGS METER */}
+        {discount > 0 && (
+          <div className="space-y-2">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-green-500 transition-all duration-700"
+                style={{
+                  width: `${Math.min(discount, 100)}%`,
+                }}
+              />
+            </div>
+
+            <p className="text-[10px] font-bold text-emerald-700">
+              Bu fırsat piyasadaki tekliflerin %{discount}
+              kadar daha avantajlı
+            </p>
+          </div>
+        )}
+
+        {/* FOMO */}
+        <div className="flex items-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2">
+          <span className="animate-pulse text-rose-500">
+            ●
+          </span>
+
+          <p className="text-[11px] font-bold text-rose-700">
+            Son 3 ürün bu fiyatta kaldı
+          </p>
         </div>
 
         {/* SOCIAL PROOF */}
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-3">
           <div className="flex -space-x-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="w-5 h-5 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative">
+              <div
+                key={i}
+                className="
+                  relative
+                  h-7
+                  w-7
+                  overflow-hidden
+                  rounded-full
+                  border-2
+                  border-white
+                  bg-gray-200
+                  shadow-md
+                "
+              >
                 <img
-                  src={`https://i.pravatar.cc/100?u=${i + product.id}`}
+                  src={`https://i.pravatar.cc/100?u=${
+                    i + product.id
+                  }`}
                   alt="user"
-                  className="object-cover"
+                  className="h-full w-full object-cover"
                 />
               </div>
             ))}
           </div>
+
           {viewerCount > 0 && (
-            <p className="text-[10px] text-gray-500 font-medium">
-              <span className="text-orange-600 font-bold">+{viewerCount} kişi</span> şu an bu ürüne bakıyor
+            <p className="text-[11px] font-medium text-gray-600">
+              <span className="font-black text-orange-600">
+                +{viewerCount} kişi
+              </span>{" "}
+              şu anda inceliyor
             </p>
           )}
         </div>
 
-        {/* CTA SECTION */}
-        <div className="mt-auto pt-1 sm:pt-2 flex gap-1.5 sm:gap-2">
+        {/* CTA */}
+        <div className="mt-auto flex gap-2 pt-2">
+          {/* Compare Desktop */}
           <Link
             href={`/compare?p1=${product.id}`}
-            className="hidden sm:flex flex-1 bg-white text-gray-700 border-2 border-gray-100 text-[11px] font-bold py-4 rounded-2xl text-center hover:border-orange-500 hover:text-orange-500 transition-all active:scale-95 items-center justify-center"
+            className="
+              hidden sm:flex
+              h-12
+              flex-1
+              items-center
+              justify-center
+              rounded-2xl
+              border-2
+              border-gray-100
+              bg-white
+              text-xs
+              font-black
+              text-gray-700
+              transition-all duration-300
+              hover:border-orange-500
+              hover:bg-orange-50
+              hover:text-orange-600
+              active:scale-95
+            "
           >
             Karşılaştır
           </Link>
-          
+
+          {/* Compare Mobile */}
           <Link
             href={`/compare?p1=${product.id}`}
-            className="sm:hidden flex items-center justify-center bg-gray-50 border border-gray-200 text-gray-400 rounded-xl w-10 h-10 shrink-0 hover:bg-orange-50 hover:text-orange-500 transition-all"
-            title="Karşılaştır"
+            className="
+              flex h-12 w-12 shrink-0 items-center justify-center
+              rounded-2xl
+              border border-gray-200
+              bg-gray-50
+              text-gray-400
+              transition-all duration-300
+              hover:bg-orange-50
+              hover:text-orange-500
+              sm:hidden
+            "
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
             </svg>
           </Link>
 
+          {/* CTA BUTTON */}
           <a
-            href={product.affiliate_link || product.source_url}
+            href={
+              product.affiliate_link ||
+              product.source_url
+            }
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 sm:flex-[1.5] bg-orange-600 text-white text-xs font-black h-10 sm:h-auto flex items-center justify-center rounded-xl sm:rounded-2xl shadow-[0_10px_20px_rgba(234,88,12,0.15)] hover:bg-orange-500 transition-all active:scale-95 gap-1.5"
+            className="
+              relative
+              overflow-hidden
+              flex-1
+              sm:flex-[1.5]
+              h-12
+              rounded-2xl
+              bg-gradient-to-r
+              from-orange-500
+              via-orange-600
+              to-red-500
+              px-4
+              text-white
+              shadow-[0_12px_30px_rgba(249,115,22,.30)]
+              transition-all
+              duration-300
+              hover:scale-[1.02]
+              hover:shadow-[0_18px_40px_rgba(249,115,22,.45)]
+              active:scale-95
+              flex
+              items-center
+              justify-center
+            "
           >
-            YAKALA 🚀
+            <span className="relative z-10 flex items-center gap-2 text-sm font-black">
+              YAKALA
+            </span>
+
+            {/* shine animation */}
+            <div className="
+              absolute inset-0
+              translate-x-[-100%]
+              bg-white/20
+              transition-transform
+              duration-1000
+              group-hover:translate-x-[100%]
+            " />
           </a>
         </div>
       </div>
