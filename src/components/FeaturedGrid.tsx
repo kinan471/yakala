@@ -8,7 +8,7 @@ export default function FeaturedGrid({ products }: { products: Product[] }) {
   const displayProducts = products.slice(0, 4);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-12">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-12">
       {displayProducts.map((p) => (
         <Link 
           key={p.id} 
