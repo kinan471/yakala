@@ -1,12 +1,16 @@
 {
   "crons": [
     {
-      "path": "/api/sync",
+      "path": "/api/discover?action=discover&secret=yakala_ultra_secret_2024",
       "schedule": "0 0 * * *"
     },
     {
       "path": "/api/discover?action=process&secret=yakala_ultra_secret_2024",
-      "schedule": "0 1 * * *"
+      "schedule": "0 1-23/2 * * *"
+    },
+    {
+      "path": "/api/sync?secret=yakala_ultra_secret_2024",
+      "schedule": "30 * * * *"
     }
   ]
 }

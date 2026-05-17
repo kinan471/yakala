@@ -362,13 +362,8 @@ const ProductCard = memo(function ProductCard({
           </Link>
 
           {/* CTA BUTTON */}
-          <a
-            href={
-              product.affiliate_link ||
-              product.source_url
-            }
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href={`/product/${product.id}`}
             className="
               relative
               overflow-hidden
@@ -405,7 +400,7 @@ const ProductCard = memo(function ProductCard({
               duration-1000
               group-hover:translate-x-[100%]
             " />
-          </a>
+          </Link>
         </div>
       </div>
     </div>

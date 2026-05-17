@@ -11,20 +11,18 @@ const DOMAINS = [
 
 const DISCOUNT_KEYWORDS = [
   "indirim", "firsat", "kampanya", "deals", "sale", "discount",
-  "sepette-ek-indirim", "flas-indirim", "gunun-firsati", "fiyati-dusenler", "kuponlu", "teshir"
+  "sepette-ek-indirim", "flas-indirim", "gunun-firsati", "fiyati-dusenler", "kuponlu",
+  "elektronik-firsat", "teknoloji-indirimleri", "buyuk-indirim", "mega-indirim"
 ];
 
 const CATEGORY_KEYWORDS = [
-  // Akıllı Mutfak (المطبخ الذكي)
-  "airfryer", "fritoz", "kahve-makinesi", "espresso", "blender", "mutfak-sefi", "mikser", "tost-makinesi", "cay-makinesi", "kettle",
-  // Akıllı Ev Temizliği (تنظيف البيت الذكي)
-  "robot-supurge", "akilli-supurge", "dikey-supurge", "sarjli-supurge", "buharli-temizleyici", "mop",
-  // Elektrikli Ev Aletleri (الأجهزة الكهربائية والبيئة)
-  "hava-temizleyici", "purifier", "hava-nemlendirici", "klima", "vantilator", "utu", "akilli-tarti",
-  // Beyaz Eşya (الأجهزة الكبيرة)
-  "buzdolabi", "dondurucu", "camasir-makinesi", "kurutma-makinesi", "bulasik-makinesi", "firin", "mikrodalga", "ankastre",
   // Teknoloji (التقنية الأساسية)
-  "bilgisayar", "laptop", "telefon", "tablet", "tv-ses", "oyun-konsol"
+  "bilgisayar", "laptop", "dizustu", "telefon", "akilli-telefon", "tablet", "tv", "televizyon", 
+  "oyun-konsolu", "playstation", "xbox", "nintendo", "monitor", "ekran-karti", "islemci",
+  // Giyilebilir & Ses (الأجهزة الملبوسة والصوت)
+  "akilli-saat", "smartwatch", "kulaklik", "bluetooth-kulaklik", "tws", "hoparlor", "soundbar",
+  // Elektronik Ev Aletleri (الإلكترونيات المنزلية الذكية)
+  "robot-supurge", "airfryer", "espresso", "akilli-ev", "kamera", "fotograf-makinesi"
 ];
 
 const IGNORED_KEYWORDS = [

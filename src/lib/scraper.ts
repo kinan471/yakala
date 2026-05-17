@@ -217,6 +217,16 @@ export async function scrapeProduct(url: string) {
 
   const comparison = await verifyLowestPrice(extracted.title || metadata.title || "Ürün");
 
+  // Generate Affiliate Link (Placeholder logic)
+  let affiliate_link = url;
+  if (platform === "trendyol") {
+    affiliate_link = url + (url.includes("?") ? "&" : "?") + "utm_source=affiliate_yakala";
+  } else if (platform === "hepsiburada") {
+    affiliate_link = url + (url.includes("?") ? "&" : "?") + "utm_source=affiliate_yakala";
+  } else if (platform === "amazon") {
+    affiliate_link = url + (url.includes("?") ? "&" : "?") + "tag=yakala-20";
+  }
+
   return {
     title: extracted.title || metadata.title || "Ürün",
     description: extracted.description || metadata.description || "",
@@ -233,6 +243,7 @@ export async function scrapeProduct(url: string) {
     source_platform: platform,
     currency,
     is_lowest_price: comparison.is_lowest,
-    comparison_data: comparison.comparison
+    comparison_data: comparison.comparison,
+    affiliate_link
   };
 }

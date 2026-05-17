@@ -881,6 +881,50 @@ export default function ProductPage() {
               </div>
             </div>
 
+            {/* SPECS */}
+            {product.specs && Object.keys(product.specs).length > 0 && (
+              <div className="rounded-[36px] bg-white p-6 shadow-sm sm:p-8">
+                <h3 className="mb-6 text-xl font-black text-gray-900">
+                  Teknik Özellikler
+                </h3>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {Object.entries(product.specs).map(([key, value]) => (
+                    <div key={key} className="flex flex-col border-b border-gray-100 pb-2">
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400">{key}</span>
+                      <span className="text-sm font-medium text-gray-900 mt-1">{String(value)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* COMPARISON DATA */}
+            {product.comparison_data && product.comparison_data.other_offers && product.comparison_data.other_offers.length > 0 && (
+              <div className="rounded-[36px] bg-white p-6 shadow-sm sm:p-8">
+                <h3 className="mb-6 text-xl font-black text-gray-900">
+                  Fiyat Analizi
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between rounded-2xl border-2 border-emerald-500 bg-emerald-50 p-4">
+                    <div>
+                      <p className="text-xs font-black uppercase text-emerald-700">En İyi Teklif (YAKALA)</p>
+                      <p className="text-sm font-bold text-gray-900">{product.source_platform.toUpperCase()}</p>
+                    </div>
+                    <p className="text-lg font-black text-emerald-600">{formatPrice(product.current_price, product.currency)}</p>
+                  </div>
+                  {product.comparison_data.other_offers.map((offer: any, idx: number) => (
+                    <div key={idx} className="flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 p-4 opacity-70">
+                      <div>
+                        <p className="text-xs font-bold uppercase text-gray-400">Alternatif</p>
+                        <p className="text-sm font-medium text-gray-700">{offer.store}</p>
+                      </div>
+                      <p className="text-base font-bold text-gray-500 line-through">{offer.price}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* trust */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div

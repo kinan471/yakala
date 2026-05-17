@@ -18,12 +18,9 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stats, setStats] = useState<Stats>({ visits: 0, products: 0, clicks: 0 });
   const [loading, setLoading] = useState(true);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [featureLoading, setFeatureLoading] = useState<string | null>(null);
   const [marqueeText, setMarqueeText] = useState("");
   const [settingsLoading, setSettingsLoading] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
-  const [botLoading, setBotLoading] = useState(false);
   const [botLog, setBotLog] = useState<string | null>(null);
 
   const loadData = async () => {
@@ -134,17 +131,6 @@ export default function AdminDashboard() {
     });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
-    setDeleteId(id);
-    setProducts(prev => prev.filter(p => p.id !== id));
-    
-    await fetch(`/api/products/${id}`, { method: "DELETE" });
-    setDeleteId(null);
-  };
-
-
-
   const updateSettings = async (key: string, value: string) => {
     setSettingsLoading(true);
     try {
@@ -163,45 +149,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleResetDB = async () => {
-    if (!confirm("⚠️ DİKKAT! Tüm ürünleri silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) return;
-    if (!confirm("Son onay: Veritabanındaki TÜM ürünler silinecek. Devam etmek istiyor musunuz?")) return;
-    setResetLoading(true);
-    try {
-      const res = await fetch("/api/reset-db", { method: "DELETE" });
-      const data = await res.json();
-      if (res.ok) {
-        setProducts([]);
-        alert("✅ Veritabanı başarıyla sıfırlandı!");
-      } else {
-        alert("Hata: " + data.error);
-      }
-    } catch (err) {
-      alert("Bağlantı hatası!");
-    } finally {
-      setResetLoading(false);
-    }
-  };
 
-  const handleRunBot = async () => {
-    if (!confirm("Ürün senkronizasyon botunu çalıştırmak istiyor musunuz? Tüm aktif ürünlerin fiyatları ve stok durumları güncellenecek.")) return;
-    setBotLoading(true);
-    setBotLog("🤖 Bot başlatılıyor...");
-    try {
-      const res = await fetch("/api/sync", { method: "POST" });
-      const data = await res.json();
-      if (res.ok) {
-        setBotLog(`✅ Bot tamamlandı!\n📦 Toplam: ${data.total} ürün\n✔️ Başarılı: ${data.success}\n❌ Hatalı: ${data.failed}`);
-        await loadData();
-      } else {
-        setBotLog(`❌ Bot hatası: ${data.error}`);
-      }
-    } catch (err) {
-      setBotLog("❌ Bağlantı hatası!");
-    } finally {
-      setBotLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
@@ -228,57 +176,9 @@ export default function AdminDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-        {/* === BOT CONTROL PANEL === */}
-        <div className="admin-card mb-6 border-l-4 border-l-blue-500 bg-gradient-to-br from-white to-blue-50/20">
-          <h3 className="text-gray-900 font-black text-lg mb-4 flex items-center gap-2">
-            🤖 Senkronizasyon Botu
-          </h3>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="flex-1">
-              <p className="text-sm text-gray-600 font-medium">
-                Bot çalıştırıldığında tüm aktif ürünlerin fiyatlarını, stok durumlarını ve görselleri otomatik olarak günceller.
-              </p>
-              {botLog && (
-                <pre className="mt-3 bg-gray-900 text-green-400 text-xs font-mono p-3 rounded-xl whitespace-pre-wrap">
-                  {botLog}
-                </pre>
-              )}
-            </div>
-            <button
-              onClick={handleRunBot}
-              disabled={botLoading}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all disabled:opacity-50 shrink-0 group"
-            >
-              {botLoading ? (
-                <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z"/></svg> Çalışıyor...</>
-              ) : (
-                <><span className="group-hover:rotate-180 transition-transform duration-500">🔄</span> Botu Başlat</>
-              )}
-            </button>
-          </div>
-        </div>
 
-        {/* === DANGER ZONE === */}
-        <div className="admin-card mb-6 border-l-4 border-l-red-500 bg-gradient-to-br from-white to-red-50/20">
-          <h3 className="text-gray-900 font-black text-lg mb-4 flex items-center gap-2">
-            ⚠️ Tehlikeli Bölge
-          </h3>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="flex-1">
-              <p className="text-sm text-red-600 font-bold">Veritabanını Sıfırla</p>
-              <p className="text-xs text-gray-500 font-medium mt-1">
-                Tüm ürünler veritabanından kalıcı olarak silinir. Bu işlem geri alınamaz!
-              </p>
-            </div>
-            <button
-              onClick={handleResetDB}
-              disabled={resetLoading}
-              className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-red-200 hover:bg-red-700 transition-all disabled:opacity-50 shrink-0"
-            >
-              {resetLoading ? "Siliniyor..." : "🗑️ Tüm Ürünleri Sil"}
-            </button>
-          </div>
-        </div>
+
+
         <div className="admin-card mb-6 border-l-4 border-l-orange-500 bg-gradient-to-br from-white to-orange-50/20">
           <h3 className="text-gray-900 font-black text-lg mb-4 flex items-center gap-2">
             📢 Duyuru Bandı (Marquee)
@@ -487,13 +387,7 @@ export default function AdminDashboard() {
                             >
                               {product.is_active ? "Gizle" : "Göster"}
                             </button>
-                            <button
-                              onClick={() => handleDelete(product.id)}
-                              disabled={deleteId === product.id}
-                              className="text-[10px] px-3 py-2 rounded-xl bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 font-black uppercase tracking-widest transition-all"
-                            >
-                              {deleteId === product.id ? "..." : "Sil"}
-                            </button>
+
                           </div>
                         </td>
                       </tr>
