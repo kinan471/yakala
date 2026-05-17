@@ -135,10 +135,13 @@ export async function processQueue(limit = 3) {
       // Smart Fingerprinting & Upsert to Products
       const fingerprint = btoa(`${product.title}-${product.category}`).substring(0, 50);
 
+      // Omit review_count since it does not exist as a column in the user's active products table
+      const { review_count, ...productToInsert } = product as any;
+
       const { error: upsertError } = await supabase
         .from("products")
         .upsert([{
-          ...product,
+          ...productToInsert,
           fingerprint,
           updated_at: new Date().toISOString()
         }], { onConflict: "fingerprint" });
