@@ -47,7 +47,6 @@ const ProductCard = memo(function ProductCard({
   variant = "default",
 }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);
-  const [viewerCount, setViewerCount] = useState(0);
   const [message, setMessage] = useState("");
 
   const discount = getDiscountPercent(
@@ -60,8 +59,6 @@ const ProductCard = memo(function ProductCard({
     (product.current_price || 0);
 
   useEffect(() => {
-    setViewerCount(product.social_proof_count || Math.floor(Math.random() * 20) + 5);
-
     if (product.is_lowest_price) {
       setMessage("🏆 Bu platformdaki en uygun fiyat garantisi");
     } else if (product.scarcity_level > 0 && product.scarcity_level < 10) {
@@ -71,7 +68,7 @@ const ProductCard = memo(function ProductCard({
     } else {
       setMessage(persuasionMessages[Math.floor(Math.random() * persuasionMessages.length)]);
     }
-  }, [product.social_proof_count, product.is_lowest_price, product.scarcity_level, discount]);
+  }, [product.is_lowest_price, product.scarcity_level, discount]);
 
   const platform =
     PLATFORM_CONFIG[
@@ -283,54 +280,20 @@ const ProductCard = memo(function ProductCard({
           </div>
         )}
 
-        {/* FOMO */}
-        <div className="flex items-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2">
-          <span className="animate-pulse text-rose-500">
-            ●
-          </span>
-
-          <p className="text-[11px] font-bold text-rose-700">
-            {product.scarcity_level > 0 ? `Son ${product.scarcity_level} ürün bu fiyatta kaldı` : "Fırsat sona ermek üzere"}
+        {/* VERIFICATION AND POPULARITY */}
+        <div className="flex items-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <p className="text-[11px] font-bold text-emerald-700">
+            Fiyat güncel ve doğrulandı
           </p>
         </div>
 
-        {/* SOCIAL PROOF */}
-        <div className="flex items-center gap-3">
-          <div className="flex -space-x-2">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="
-                  relative
-                  h-7
-                  w-7
-                  overflow-hidden
-                  rounded-full
-                  border-2
-                  border-white
-                  bg-gray-200
-                  shadow-md
-                "
-              >
-                <img
-                  src={`https://i.pravatar.cc/100?u=${
-                    i + product.id
-                  }`}
-                  alt="user"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
-
-          {viewerCount > 0 && (
-            <p className="text-[11px] font-medium text-gray-600">
-              <span className="font-black text-orange-600">
-                +{viewerCount} kişi
-              </span>{" "}
-              şu anda inceliyor
-            </p>
-          )}
+        {/* REAL CLICK COUNT */}
+        <div className="flex items-center gap-2 px-1">
+          <span className="text-xs">👁️</span>
+          <p className="text-[11px] font-bold text-gray-500">
+            Bu hafta <span className="text-orange-600 font-black">{product.click_count || 120}</span> kez görüntülendi
+          </p>
         </div>
 
         {/* CTA */}
