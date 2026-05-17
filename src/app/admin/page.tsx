@@ -22,6 +22,13 @@ export default function AdminDashboard() {
   const [marqueeText, setMarqueeText] = useState("");
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [botLog, setBotLog] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | null }>({ message: "", type: null });
+
+  const showToast = (message: string, type: "success" | "error") => {
+    setToast({ message, type });
+    setTimeout(() => setToast({ message: "", type: null }), 5000);
+  };
 
   const loadData = async () => {
     if (!isAuth) return;
@@ -131,20 +138,23 @@ export default function AdminDashboard() {
     });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
+  const confirmDelete = async () => {
+    if (!deleteId) return;
     try {
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch(`/api/products/${deleteId}`, {
         method: "DELETE"
       });
       if (res.ok) {
-        setProducts(prev => prev.filter(p => p.id !== id));
-        alert("Ürün başarıyla silindi!");
+        setProducts(prev => prev.filter(p => p.id !== deleteId));
+        showToast("Ürün başarıyla silindi!", "success");
       } else {
-        alert("Ürün silinirken bir hata oluştu!");
+        const errData = await res.json().catch(() => ({}));
+        showToast(errData.error || "Ürün silinirken bir hata oluştu!", "error");
       }
-    } catch {
-      alert("Bağlantı hatası!");
+    } catch (err: any) {
+      showToast("Bağlantı hatası: " + err.message, "error");
+    } finally {
+      setDeleteId(null);
     }
   };
 
@@ -405,7 +415,7 @@ export default function AdminDashboard() {
                               {product.is_active ? "Gizle" : "Göster"}
                             </button>
                             <button
-                              onClick={() => handleDelete(product.id)}
+                              onClick={() => setDeleteId(product.id)}
                               className="text-[10px] px-3 py-2 rounded-xl bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 font-black uppercase tracking-widest transition-all"
                             >
                               Sil
@@ -422,6 +432,60 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+
+      {/* Modern Confirm Delete Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full mx-4 border border-gray-100 shadow-2xl animate-scale-up">
+            <div className="text-center">
+              <div className="inline-flex p-3 rounded-2xl bg-red-50 text-red-500 mb-4 border border-red-100">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" />
+                </svg>
+              </div>
+              <h3 className="text-gray-900 font-black text-xl mb-2">Ürünü Silmek İstiyor Musunuz?</h3>
+              <p className="text-gray-500 text-sm font-medium mb-6">
+                Bu ürünü silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve ürün veritabanından kalıcı olarak kaldırılacaktır.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteId(null)}
+                  className="flex-1 py-3.5 bg-gray-50 hover:bg-gray-100 text-gray-500 rounded-xl text-sm font-black transition-all border border-gray-100"
+                >
+                  İptal Et
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-black transition-all shadow-lg shadow-red-100"
+                >
+                  Evet, Sil
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modern Glassmorphic Toast Notification */}
+      {toast.type && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-white border border-gray-100 rounded-2xl p-4 shadow-2xl flex items-center gap-3 animate-slide-up">
+          <div className={`p-2 rounded-xl flex-shrink-0 ${toast.type === "success" ? "bg-green-50 text-green-500 border border-green-100" : "bg-red-50 text-red-500 border border-red-100"}`}>
+            {toast.type === "success" ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            )}
+          </div>
+          <div className="flex-1">
+            <div className="text-gray-900 text-xs font-black uppercase tracking-wider">Sistem Bildirimi</div>
+            <div className="text-gray-500 text-xs mt-0.5 font-medium">{toast.message}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
