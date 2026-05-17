@@ -1,5 +1,6 @@
 import { scrapeProduct } from "./scraper";
 import { supabase } from "./supabase";
+import { autoClassifyFeaturedProducts } from "./products";
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY!;
 
@@ -127,15 +128,15 @@ export async function discoverViaSitemap() {
  * PHASE 2: WORKER
  * Processes the queue in parallel with a concurrency limit.
  */
-export async function processQueue(limit = 3) {
-  console.log(`[Worker] Processing queue with concurrency limit: ${limit}`);
+export async function processQueue(limit = 15) {
+  console.log(`[Worker] Processing queue with batch size limit: ${limit}`);
   
   // 1. Get pending tasks
   const { data: tasks, error } = await supabase
     .from("pending_scrapes")
     .select("*")
     .eq("status", "pending")
-    .limit(15); // Batch size
+    .limit(limit); // Batch size
 
   if (error || !tasks || tasks.length === 0) {
     console.log("[Worker] No pending tasks found.");
@@ -204,5 +205,13 @@ export async function processQueue(limit = 3) {
 
   const successCount = results.filter(r => r.status === "fulfilled" && r.value === true).length;
   console.log(`[Worker] Completed batch. Success: ${successCount}/${tasks.length}`);
+  
+  // Dynamically trigger automatic featured classification for the day
+  try {
+    await autoClassifyFeaturedProducts();
+  } catch (fe) {
+    console.error("[FeaturedClassifier] Error during automatic classification:", fe);
+  }
+
   return successCount;
 }

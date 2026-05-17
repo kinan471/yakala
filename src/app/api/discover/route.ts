@@ -11,6 +11,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const limitParam = searchParams.get("limit");
+    const limit = limitParam ? parseInt(limitParam) : null;
+
     if (action === "discover") {
       console.log("[API] Triggering Map Discovery...");
       const count = await discoverViaSitemap();
@@ -19,15 +22,15 @@ export async function POST(req: Request) {
 
     if (action === "process") {
       console.log("[API] Triggering Parallel Processing...");
-      const count = await processQueue(3); // Concurrency 3
+      const count = await processQueue(limit || 15); 
       return NextResponse.json({ success: true, processed: count, message: "Processing phase complete." });
     }
 
     if (action === "all") {
       console.log("[API] Triggering Combined Discovery & Processing...");
       const discovered = await discoverViaSitemap();
-      // Only process a small amount to prevent Vercel 10s timeout
-      const processed = await processQueue(2); 
+      // Process custom limit or default to 3 to prevent Vercel 10s timeout
+      const processed = await processQueue(limit || 3); 
       return NextResponse.json({ 
         success: true, 
         discovered, 
