@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   const [featureLoading, setFeatureLoading] = useState<string | null>(null);
   const [marqueeText, setMarqueeText] = useState("");
   const [settingsLoading, setSettingsLoading] = useState(false);
-  const [crawlLoading, setCrawlLoading] = useState<string | null>(null);
+  const [crawlLoading, setCrawlLoading] = useState<"discover" | "process" | "all" | "reset" | null>(null);
   const [botLog, setBotLog] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | null }>({ message: "", type: null });
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const runCrawlerAction = async (action: "discover" | "process" | "all") => {
+  const runCrawlerAction = async (action: "discover" | "process" | "all" | "reset") => {
     setCrawlLoading(action);
     showToast(`${action === "discover" ? "Yeni indirim keşfi" : action === "process" ? "Kuyruktaki ürünleri işleme" : "Tam akış keşfi"} süreci başlatıldı...`, "success");
     try {
@@ -192,6 +192,7 @@ export default function AdminDashboard() {
         let msg = "";
         if (action === "discover") msg = `Keşif tamamlandı! ${data.discovered} yeni ürün sıraya eklendi.`;
         else if (action === "process") msg = `İşleme tamamlandı! ${data.processed} ürün başarıyla işlendi ve Günün En İyi 3 Yakalası güncellendi.`;
+        else if (action === "reset") msg = data.message;
         else msg = `Tam akış tamamlandı! ${data.discovered} keşfedildi, ${data.processed} işlendi.`;
         showToast(msg, "success");
         loadData(); // Reload stats and products list dynamically!
@@ -290,27 +291,38 @@ export default function AdminDashboard() {
           <p className="text-xs text-gray-500 font-medium mb-5">
             Otomatik ürün keşif aramasını başlatabilir, sıradaki bekleyen indirimli ürünleri (örneğin 100 ürün) paralel kanallarla veritabanına aktarabilir ve Günün En İyi 3 Yakalası'nı tamamen yapay zeka ile otomatik atayabilirsiniz.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <button
               onClick={() => runCrawlerAction("discover")}
               disabled={crawlLoading !== null}
-              className="py-4 px-6 bg-white hover:bg-gray-50 border border-gray-200 text-gray-900 rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+              className="py-4 px-4 bg-white hover:bg-gray-50 border border-gray-200 text-gray-900 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
             >
-              {crawlLoading === "discover" ? "🔍 Aranıyor..." : "🔍 1. Adım: Yeni Ürün Keşfet"}
+              {crawlLoading === "discover" ? "🔍 Aranıyor..." : "🔍 1. Adım: Keşfet"}
             </button>
             <button
               onClick={() => runCrawlerAction("process")}
               disabled={crawlLoading !== null}
-              className="py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100 disabled:opacity-50"
+              className="py-4 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100 disabled:opacity-50"
             >
-              {crawlLoading === "process" ? "⚡ İşleniyor..." : "⚡ 2. Adım: Kuyruğu Sür (100 Ürün)"}
+              {crawlLoading === "process" ? "⚡ İşleniyor..." : "⚡ 2. Adım: İşle (100)"}
             </button>
             <button
               onClick={() => runCrawlerAction("all")}
               disabled={crawlLoading !== null}
-              className="py-4 px-6 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-100 disabled:opacity-50"
+              className="py-4 px-4 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-100 disabled:opacity-50"
             >
-              {crawlLoading === "all" ? "🔥 Tam Akış Çalışıyor..." : "🔥 Tam Akış (Keşfet + İşle)"}
+              {crawlLoading === "all" ? "🔥 Tam Akış..." : "🔥 Tam Akış"}
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm("DİKKAT: Veritabanındaki tüm ürünler silinecek ve kuyruk sıfırlanacaktır. Emin misiniz?")) {
+                  runCrawlerAction("reset" as any);
+                }
+              }}
+              disabled={crawlLoading !== null}
+              className="py-4 px-4 bg-red-100 hover:bg-red-200 text-red-700 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {crawlLoading === "reset" ? "🗑️ Siliniyor..." : "🗑️ Sıfırla (Temizle)"}
             </button>
           </div>
         </div>

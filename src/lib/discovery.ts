@@ -131,15 +131,17 @@ export async function discoverViaSitemap() {
 export async function processQueue(limit = 15) {
   console.log(`[Worker] Processing queue with batch size limit: ${limit}`);
   
-  // 1. Get pending tasks
+  // 1. Get pending and failed tasks (with retry limit)
   const { data: tasks, error } = await supabase
     .from("pending_scrapes")
     .select("*")
-    .eq("status", "pending")
+    .in("status", ["pending", "failed"])
+    .lt("attempts", 3)
+    .order("status", { ascending: false }) // prioritize pending over failed
     .limit(limit); // Batch size
 
   if (error || !tasks || tasks.length === 0) {
-    console.log("[Worker] No pending tasks found.");
+    console.log("[Worker] No pending or retriable tasks found.");
     return 0;
   }
 

@@ -42,6 +42,28 @@ export async function POST(req: Request) {
       });
     }
 
+    if (action === "reset") {
+      console.log("[API] Triggering Database Reset...");
+      const { supabase } = require("@/lib/supabase");
+      
+      // 1. Reset pending scrapes
+      const { error: resetErr } = await supabase
+        .from('pending_scrapes')
+        .update({ status: 'pending', attempts: 0, last_error: null })
+        .neq('status', 'processing'); // update all
+      
+      // 2. Delete all products to start fresh with new fingerprinting
+      const { error: delErr } = await supabase
+        .from('products')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+        
+      if (resetErr || delErr) {
+        throw new Error(resetErr?.message || delErr?.message);
+      }
+      return NextResponse.json({ success: true, message: "Database products cleared and queue reset successfully." });
+    }
+
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (err: any) {
     console.error("API error:", err);
