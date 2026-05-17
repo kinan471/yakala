@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Product, formatPrice, getDiscountPercent } from "@/lib/supabase";
+import { computeDealScore, getSignalClasses } from "@/lib/deal-score";
 import { useRouter } from "next/navigation";
 
 interface CompareViewProps {
@@ -258,8 +259,20 @@ export default function CompareView({ allProducts, p1, p2, p2Name }: CompareView
           {product.original_price > product.current_price && (
             <div className="text-xs text-gray-400 line-through mb-3">{formatPrice(product.original_price, product.currency)}</div>
           )}
+          
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
+            {/* Real Deal Score Badge */}
+            {(() => {
+              const deal = computeDealScore(product);
+              const classes = getSignalClasses(deal.signal);
+              return (
+                <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-black ${classes.bgLight} ${classes.text} ${classes.border} border`}>
+                  <span>{deal.signalEmoji} {deal.score}/100</span>
+                </div>
+              );
+            })()}
+
+            <div className="flex items-center gap-1 text-xs font-bold text-amber-500 border-l border-gray-100 pl-3">
               {"★".repeat(Math.round(product.rating))}{"☆".repeat(5 - Math.round(product.rating))}
               <span className="text-gray-500 ml-1">{product.rating.toFixed(1)}</span>
             </div>

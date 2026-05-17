@@ -3,6 +3,7 @@ import FeaturedSlider from "@/components/FeaturedSlider";
 import FeaturedGrid from "@/components/FeaturedGrid";
 import ClientProductList from "@/components/ClientProductList";
 import Marquee from "@/components/Marquee";
+import TopDealsSection from "@/components/TopDealsSection";
 import { Suspense } from "react";
 
 // ISR - revalidate every 60 seconds
@@ -30,6 +31,11 @@ export default async function HomePage() {
           {/* ========== FEATURED GRID (4 Squares) ========== */}
           {featuredProducts.length > 0 && (
             <FeaturedGrid products={featuredProducts} />
+          )}
+
+          {/* ========== TOP DEALS TODAY (Deal Score Sorted) ========== */}
+          {allProducts.length > 0 && (
+            <TopDealsSection products={allProducts} />
           )}
 
           {/* ========== PRODUCT LIST WITH SEARCH ========== */}

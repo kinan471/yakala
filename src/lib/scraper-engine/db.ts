@@ -95,20 +95,58 @@ export async function logScrapingExecution(entry: ScrapingLogEntry) {
 }
 
 /**
+ * Unified Fingerprint Generator - Single source of truth for deduplication
+ * Normalizes Turkish characters so same product from different platforms = same fingerprint
+ */
+export function generateProductFingerprint(title: string): string {
+  const normalized = title
+    .toLowerCase()
+    .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+    .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const words = normalized.split(' ').filter(w => w.length > 1);
+  const brand = words[0] || 'unknown';
+
+  // MPN detection: 6+ chars with both letters and digits (e.g. FA507NVR, SM-G998B)
+  const mpn = words.find(w => w.length >= 6 && /[a-z]/.test(w) && /[0-9]/.test(w));
+
+  const base = mpn
+    ? `${brand}-${mpn}`
+    : words.slice(0, 6).join('-');
+
+  // Use encodeURIComponent to handle non-ASCII safely before btoa
+  return btoa(unescape(encodeURIComponent(base))).substring(0, 50);
+}
+
+/**
  * Persistence Handler: Saves or updates validated products, ensuring fingerprint integrity
+ * Uses BOTH fingerprint AND source_url as deduplication keys to prevent any double storage
  */
 export async function persistScrapedProduct(product: ScrapedProduct, confidenceScore: number): Promise<boolean> {
   try {
-    // Dynamic fingerprinting based on title and category
-    const cleanTitle = product.title.trim();
-    const fingerprint = btoa(`${cleanTitle}-${product.category || 'Genel'}`).substring(0, 50);
+    // Use the unified fingerprint generator (same algorithm everywhere)
+    const fingerprint = generateProductFingerprint(product.title);
 
-    // Get historical price for anomaly comparison
-    const { data: existing } = await supabase
+    // PRIMARY: Check if this EXACT URL already exists (strongest dedup key)
+    const cleanUrl = product.source_url.split('?')[0]; // Remove query params
+    const { data: existingByUrl } = await supabase
+      .from('products')
+      .select('id, current_price')
+      .eq('source_url', cleanUrl)
+      .single();
+
+    // SECONDARY: Check by fingerprint (catches same product from different platforms)
+    const { data: existingByFp } = !existingByUrl ? await supabase
       .from('products')
       .select('id, current_price')
       .eq('fingerprint', fingerprint)
-      .single();
+      .single() : { data: null };
+
+    const existing = existingByUrl || existingByFp;
+
 
     // Clean payload for active base columns (remove review_count as it's not present in user's products table)
     const { review_count, ...productToInsert } = product as any;
@@ -122,7 +160,7 @@ export async function persistScrapedProduct(product: ScrapedProduct, confidenceS
 
     const { data, error } = await supabase
       .from('products')
-      .upsert([upsertPayload], { onConflict: 'fingerprint' })
+      .upsert([upsertPayload], { onConflict: 'source_url' })
       .select('id')
       .single();
 

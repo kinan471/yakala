@@ -1,6 +1,7 @@
 import { scrapeProduct } from "./scraper";
 import { supabase } from "./supabase";
 import { autoClassifyFeaturedProducts } from "./products";
+import { generateProductFingerprint } from "./scraper-engine/db";
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY!;
 
@@ -9,7 +10,6 @@ const DOMAINS = [
   { platform: "hepsiburada", url: "https://www.hepsiburada.com" },
   { platform: "n11", url: "https://www.n11.com" },
   { platform: "gittigidiyor", url: "https://www.gittigidiyor.com" },
-  { platform: "teknosa", url: "https://www.teknosa.com" }
 ];
 
 const DISCOUNT_KEYWORDS = [
@@ -186,35 +186,8 @@ export async function processQueue(limit = 15) {
         throw new Error(`Scraped price for technology product is suspiciously low: ${product.current_price} TL`);
       }
 
-      // Smart Fingerprinting & Deduplication Engine
-      // Normalize Turkish/special chars so same product from 2 platforms = same fingerprint
-      const normalizeTitle = (t: string) => t
-        .toLowerCase()
-        .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
-        .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
-        .replace(/[^a-z0-9\s]/g, ' ')  // keep spaces, remove special chars
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      const normalized = normalizeTitle(product.title);
-      const words = normalized.split(' ').filter(w => w.length > 1);
-      const brand = words[0] || "unknown";
-      
-      // Look for a Manufacturer Part Number (MPN) - typically 6+ chars, mixed letters and numbers
-      // e.g. "FA507NVR", "LP005A17", "SM-G998B"
-      const partNumber = words.find(w => 
-        w.length >= 6 && /[a-z]/.test(w) && /[0-9]/.test(w)
-      );
-      
-      let baseFingerprint = "";
-      if (partNumber) {
-        // MPN uniquely identifies the exact product spec
-        baseFingerprint = `${brand}-${partNumber}`;
-      } else {
-        // Fallback: use first 6 meaningful words (brand + model keywords)
-        baseFingerprint = words.slice(0, 6).join("-");
-      }
-      const fingerprint = btoa(unescape(encodeURIComponent(baseFingerprint))).substring(0, 50);
+      // Unified Deduplication: use generateProductFingerprint (same as scraper-engine/db.ts)
+      const fingerprint = generateProductFingerprint(product.title);
 
       // Omit review_count since it does not exist as a column in the user's active products table
       const { review_count, ...productToInsert } = product as any;
@@ -225,7 +198,7 @@ export async function processQueue(limit = 15) {
           ...productToInsert,
           fingerprint,
           updated_at: new Date().toISOString()
-        }], { onConflict: "fingerprint" });
+        }], { onConflict: "source_url" }); // source_url is the strongest dedup key
 
       if (upsertError) throw upsertError;
 

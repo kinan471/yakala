@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import {
   Product,
   getDiscountPercent,
   formatPrice,
 } from "@/lib/supabase";
+import { computeDealScore, getSignalClasses } from "@/lib/deal-score";
 
 interface ProductCardProps {
   product: Product;
@@ -47,7 +48,6 @@ const ProductCard = memo(function ProductCard({
   variant = "default",
 }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);
-  const [message, setMessage] = useState("");
 
   const discount = getDiscountPercent(
     product.original_price || 0,
@@ -58,17 +58,9 @@ const ProductCard = memo(function ProductCard({
     (product.original_price || 0) -
     (product.current_price || 0);
 
-  useEffect(() => {
-    if (product.is_lowest_price) {
-      setMessage("🏆 Bu platformdaki en uygun fiyat garantisi");
-    } else if (product.scarcity_level > 0 && product.scarcity_level < 10) {
-      setMessage(`⏳ Stokta son ${product.scarcity_level} adet kaldı!`);
-    } else if (discount >= 40) {
-      setMessage("💸 Kaçırılmayacak %" + discount + " indirim fırsatı");
-    } else {
-      setMessage(persuasionMessages[Math.floor(Math.random() * persuasionMessages.length)]);
-    }
-  }, [product.is_lowest_price, product.scarcity_level, discount]);
+  // Compute deal score once per render
+  const deal = useMemo(() => computeDealScore(product), [product]);
+  const classes = useMemo(() => getSignalClasses(deal.signal), [deal.signal]);
 
   const platform =
     PLATFORM_CONFIG[
@@ -126,7 +118,7 @@ const ProductCard = memo(function ProductCard({
         )}
       </div>
 
-      {/* PLATFORM SCORE - only show real rating */}
+      {/* PLATFORM RATING - Real rating badge */}
       {product.rating > 0 && (
         <div className="absolute top-3 right-3 z-30">
           <div className="rounded-full bg-black/80 backdrop-blur-md px-3 py-1.5 text-[10px] font-black text-white shadow-xl">
@@ -202,6 +194,13 @@ const ProductCard = memo(function ProductCard({
           </div>
         </div>
 
+        {/* BUY SIGNAL BADGE - The Decision Engine */}
+        <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black ${classes.badge} mb-1`}>
+          <span className={`w-1.5 h-1.5 rounded-full bg-white/70 ${deal.signal === 'BUY_NOW' ? 'animate-pulse' : ''}`} />
+          {deal.signalEmoji} {deal.signalLabel}
+          <span className={`ml-1 px-1.5 py-0.5 rounded-md bg-white/20 text-[9px] font-black`}>{deal.score}/100</span>
+        </div>
+
         {/* TITLE */}
         <Link href={`/product/${product.id}`}>
           <h3 className="
@@ -219,10 +218,10 @@ const ProductCard = memo(function ProductCard({
           </h3>
         </Link>
 
-        {/* PERSUASION */}
-        <div className="rounded-2xl border border-orange-100 bg-orange-50 px-3 py-2">
-          <p className="text-[11px] font-bold text-orange-700">
-            {message}
+        {/* SMART SCARCITY (from Deal Engine - real data) */}
+        <div className={`rounded-2xl border px-3 py-2 ${classes.bgLight} ${classes.border}`}>
+          <p className={`text-[11px] font-bold ${classes.text}`}>
+            {deal.scarcityText}
           </p>
         </div>
 

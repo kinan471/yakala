@@ -9,6 +9,8 @@ import {
   Product,
 } from "@/lib/supabase";
 
+import { computeDealScore, getSignalClasses } from "@/lib/deal-score";
+
 import Link from "next/link";
 import CountdownTimer from "@/components/CountdownTimer";
 import ImageGallery from "@/components/ImageGallery";
@@ -37,9 +39,6 @@ export default function ProductPage() {
   const [loading, setLoading] =
     useState(true);
 
-  const [persuasionText, setPersuasionText] =
-    useState("");
-
   useEffect(() => {
     if (!id) return;
 
@@ -58,13 +57,7 @@ export default function ProductPage() {
     }
 
     fetchProduct();
-
-    if (product?.is_lowest_price) {
-      setPersuasionText("🏆 Bu ürün piyasadaki en düşük fiyatta!");
-    } else {
-      setPersuasionText(persuasionMessages[Math.floor(Math.random() * persuasionMessages.length)]);
-    }
-  }, [id, product?.is_lowest_price]);
+  }, [id]);
 
   const discount = useMemo(() => {
     if (!product) return 0;
@@ -75,28 +68,15 @@ export default function ProductPage() {
     );
   }, [product]);
 
-  const savings = useMemo(() => {
-    if (!product) return 0;
-
-    return (
-      product.original_price -
-      product.current_price
-    );
+  const deal = useMemo(() => {
+    if (!product) return null;
+    return computeDealScore(product);
   }, [product]);
 
-  const scarcityPct = useMemo(() => {
-    if (!product) return 0;
-
-    return Math.max(
-      8,
-      Math.min(
-        100,
-        ((15 - product.scarcity_level) /
-          15) *
-          100
-      )
-    );
-  }, [product]);
+  const classes = useMemo(() => {
+    if (!deal) return { bgLight: "", border: "", text: "" };
+    return getSignalClasses(deal.signal);
+  }, [deal]);
 
   if (loading) {
     return (
@@ -121,7 +101,7 @@ export default function ProductPage() {
     );
   }
 
-  if (!product) {
+  if (!product || !deal) {
     return (
       <main className="min-h-screen bg-[#fafafa]">
 
@@ -421,67 +401,62 @@ export default function ProductPage() {
 
             {/* persuasion */}
             <div
-              className="
-                flex
-                items-center
-                gap-3
-                rounded-2xl
-                border
-                border-orange-100
-                bg-gradient-to-r
-                from-orange-50
-                to-rose-50
-                px-5
-                py-4
-              "
+              className={`flex items-center gap-3 rounded-2xl border px-5 py-4 ${classes.bgLight} ${classes.border}`}
             >
               <span className="text-lg">
-                ⚡
+                {deal.signalEmoji}
               </span>
 
-              <p className="text-sm font-black text-orange-700">
-                {persuasionText}
+              <p className={`text-sm font-black ${classes.text}`}>
+                {deal.scarcityText}
               </p>
             </div>
 
-            {/* ai score */}
+            {/* REAL DEAL SCORE ENGINE */}
             <div
-              className="
-                rounded-3xl
-                bg-gradient-to-r
-                from-violet-500
-                to-fuchsia-500
-                p-5
-                text-white
-              "
+              className={`rounded-3xl p-6 text-white bg-gradient-to-br ${
+                deal.signal === "BUY_NOW"
+                  ? "from-emerald-500 to-emerald-700"
+                  : deal.signal === "NORMAL"
+                  ? "from-amber-400 to-amber-600"
+                  : "from-rose-400 to-rose-600"
+              }`}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold uppercase">
-                    AI DEAL SCORE
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-white/80">
+                      YAKALA DEAL SCORE
+                    </p>
+                    <span className="rounded-md bg-white/20 px-2 py-0.5 text-[9px] font-black">
+                      GERÇEK VERİ
+                    </span>
+                  </div>
 
-                  <h3 className="mt-2 text-3xl font-black">
-                    {Math.min(10, Number((
-                      (product.rating || 0) * 1.5 +
-                      (product.is_lowest_price ? 2.0 : 0.5) +
-                      (discount / 100) * 1.0
-                    ).toFixed(1)))} / 10
+                  <h3 className="mt-1 text-5xl font-black tracking-tighter">
+                    {deal.score}<span className="text-2xl text-white/60">/100</span>
                   </h3>
-                  <p className="mt-1 text-[10px] text-white/60 uppercase tracking-widest">Tahmini Skor</p>
+                  
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-bold">
+                    <span className={`w-1.5 h-1.5 rounded-full bg-white ${deal.signal === 'BUY_NOW' ? 'animate-pulse' : ''}`} />
+                    {deal.signalLabel}
+                  </div>
                 </div>
 
-                <div className="text-5xl">
-                  🤖
+                <div className="text-6xl opacity-90 mix-blend-overlay">
+                  {deal.signal === "BUY_NOW" ? "🎯" : deal.signal === "NORMAL" ? "⚖️" : "✋"}
                 </div>
               </div>
 
-              <p className="mt-4 text-sm text-white/90">
-                {product.is_lowest_price 
-                  ? `Yapay zekâ analizi: Bu ürün şu anda piyasadaki en düşük fiyata sahip. Fiyatı son 30 günün ortalamasının altında.`
-                  : `Yapay zekâ analizi: Ürün yüksek fiyat/performans oranına sahip. Kullanıcı değerlendirmeleri ve fiyat eğilimleri olumlu.`
-                }
-              </p>
+              {/* Reasons */}
+              <div className="mt-5 space-y-2 border-t border-white/20 pt-4">
+                {deal.reasons.map((reason, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-sm font-medium text-white/90">
+                    <span className="text-white">✓</span>
+                    {reason}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* pricing card */}
