@@ -60,8 +60,32 @@ export async function fetchWithStealth(url: string, platform: string, forceJS = 
       playwright = require(playwrightLib);
     } catch {
       // Graceful fallback to Firecrawl API if playwright binary is missing in Vercel environment
-      console.warn("[BrowserPool] Playwright is not installed/supported in this environment. Falling back to HTTP/Firecrawl.");
+      console.warn("[BrowserPool] Playwright is not installed/supported in this environment. Falling back to Firecrawl.");
       
+      if (ENGINE_CONFIG.firecrawlKey) {
+        const firecrawlRes = await fetch("https://api.firecrawl.dev/v1/scrape", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${ENGINE_CONFIG.firecrawlKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url, formats: ["html"] })
+        });
+        
+        if (firecrawlRes.ok) {
+          const json = await firecrawlRes.json();
+          if (json.data && json.data.html) {
+             return {
+               html: json.data.html,
+               status: 200,
+               success: true,
+               error: "Playwright missing. Degraded to Firecrawl HTML fetch."
+             };
+          }
+        }
+      }
+
+      // Ultimate fallback if Firecrawl also fails
       const res = await fetch(url, { headers: { 'User-Agent': userAgent } });
       const html = await res.text();
       return {
