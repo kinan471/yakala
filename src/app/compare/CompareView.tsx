@@ -331,7 +331,7 @@ export default function CompareView({ allProducts, p1, p2, p2Name }: CompareView
     const s2 = p2Score || 50;
 
     return (
-      <div className="mt-8 space-y-6">
+      <div className="mt-8">
         <div className="rounded-3xl overflow-hidden shadow-xl shadow-orange-500/15">
           <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 p-8 text-white relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
@@ -391,68 +391,34 @@ export default function CompareView({ allProducts, p1, p2, p2Name }: CompareView
             </div>
           </div>
         </div>
-
-        {/* Deep Analysis Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Actual Performance */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
-            <div className="text-3xl mb-4 bg-orange-50 w-12 h-12 flex items-center justify-center rounded-2xl text-orange-500">⚡</div>
-            <h5 className="font-black text-sm text-gray-900 mb-3 uppercase tracking-widest">Gerçek Dünya Performansı</h5>
-            <p className="text-sm text-gray-600 leading-relaxed flex-1">{actualPerformanceComparison}</p>
-          </div>
-
-          {/* Sentiment Analysis */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
-            <div className="text-3xl mb-4 bg-blue-50 w-12 h-12 flex items-center justify-center rounded-2xl text-blue-500">💬</div>
-            <h5 className="font-black text-sm text-gray-900 mb-4 uppercase tracking-widest">Kullanıcı Yorumları (Duygu Analizi)</h5>
-            <div className="space-y-4 flex-1">
-              <div>
-                <div className="text-[10px] font-black uppercase text-gray-400 mb-1.5 line-clamp-1">{p1.title}</div>
-                <p className="text-sm text-gray-700 leading-relaxed font-medium">"{p1Sentiment}"</p>
-              </div>
-              <div className="h-px w-full bg-gray-100"></div>
-              <div>
-                <div className="text-[10px] font-black uppercase text-gray-400 mb-1.5 line-clamp-1">{p2DisplayTitle}</div>
-                <p className="text-sm text-gray-700 leading-relaxed font-medium">"{p2Sentiment}"</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Recommendation Engine (Target Audience) */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
-            <div className="text-3xl mb-4 bg-green-50 w-12 h-12 flex items-center justify-center rounded-2xl text-green-500">🎯</div>
-            <h5 className="font-black text-sm text-gray-900 mb-4 uppercase tracking-widest">Kimin İçin Uygun?</h5>
-            <div className="space-y-3 flex-1">
-              <div className={`p-4 rounded-2xl border ${winner.id === p1.id ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`}>
-                <div className={`text-[10px] font-black uppercase mb-1.5 line-clamp-1 ${winner.id === p1.id ? 'text-green-600' : 'text-gray-500'}`}>{p1.title}</div>
-                <p className={`text-sm leading-relaxed ${winner.id === p1.id ? 'text-green-900 font-medium' : 'text-gray-600'}`}>{p1TargetAudience}</p>
-              </div>
-              <div className={`p-4 rounded-2xl border ${winner.id !== p1.id ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`}>
-                <div className={`text-[10px] font-black uppercase mb-1.5 line-clamp-1 ${winner.id !== p1.id ? 'text-green-600' : 'text-gray-500'}`}>{p2DisplayTitle}</div>
-                <p className={`text-sm leading-relaxed ${winner.id !== p1.id ? 'text-green-900 font-medium' : 'text-gray-600'}`}>{p2TargetAudience}</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     );
   };
 
   return (
     <div>
-      {/* Product cards header row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {renderProductCard(p1, false)}
-        {renderProductCard(p2, true)}
+      {/* Product cards header row - Products side by side */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-3">
+          <span className="text-3xl">📊</span>
+          Ürün Karşılaştırması
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {renderProductCard(p1, false)}
+          {renderProductCard(p2, true)}
+        </div>
       </div>
 
       {p1 && (p2 || p2Name) && (
         <>
-          {renderVerdict()}
-
-          {/* AI Generated Dynamic Comparison Table */}
+          {/* Comparison Table First */}
           {aiResult?.comparisonTable && aiResult.comparisonTable.length > 0 && (
             <div className="mt-8 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-orange-50 border-b border-gray-100">
+                <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                  <span>✨</span> Detaylı Karşılaştırma Tablosu
+                </h3>
+              </div>
               {/* Sticky header */}
               <div className="grid grid-cols-[30%_35%_35%] bg-white border-b-2 border-gray-100 sticky top-0 z-10 shadow-sm">
                 <div className="py-4 px-6 text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -484,6 +450,80 @@ export default function CompareView({ allProducts, p1, p2, p2Name }: CompareView
               </table>
             </div>
           )}
+
+          {/* Gerçek Dünya Performansı */}
+          {aiResult?.actualPerformanceComparison && (
+            <div className="mt-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="text-4xl bg-orange-50 w-14 h-14 flex items-center justify-center rounded-2xl text-orange-500 flex-shrink-0">⚡</div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-black text-gray-900 mb-3 uppercase tracking-widest flex items-center gap-2">
+                    Gerçek Dünya Performansı
+                  </h3>
+                  <p className="text-base text-gray-700 leading-relaxed">{aiResult.actualPerformanceComparison}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Kullanıcı Yorumları (Duygu Analizi) */}
+          {(aiResult?.p1Sentiment || aiResult?.p2Sentiment) && (
+            <div className="mt-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="text-4xl bg-blue-50 w-14 h-14 flex items-center justify-center rounded-2xl text-blue-500 flex-shrink-0">💬</div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-widest">
+                    Kullanıcı Yorumları (Duygu Analizi)
+                  </h3>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {aiResult.p1Sentiment && (
+                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                    <div className="text-[11px] font-black uppercase text-gray-400 mb-2 line-clamp-1">{p1.title}</div>
+                    <p className="text-sm text-gray-700 leading-relaxed font-medium italic">"{aiResult.p1Sentiment}"</p>
+                  </div>
+                )}
+                {aiResult.p2Sentiment && (
+                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                    <div className="text-[11px] font-black uppercase text-gray-400 mb-2 line-clamp-1">{p2?.title || p2Name}</div>
+                    <p className="text-sm text-gray-700 leading-relaxed font-medium italic">"{aiResult.p2Sentiment}"</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Kimin İçin Uygun? */}
+          {(aiResult?.p1TargetAudience || aiResult?.p2TargetAudience) && (
+            <div className="mt-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="text-4xl bg-green-50 w-14 h-14 flex items-center justify-center rounded-2xl text-green-500 flex-shrink-0">🎯</div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-widest">
+                    Kimin İçin Uygun?
+                  </h3>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {aiResult.p1TargetAudience && (
+                  <div className={`p-5 rounded-2xl border ${winnerId === 1 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-100'}`}>
+                    <div className={`text-[11px] font-black uppercase mb-2 line-clamp-1 ${winnerId === 1 ? 'text-green-600' : 'text-gray-500'}`}>{p1.title}</div>
+                    <p className={`text-sm leading-relaxed ${winnerId === 1 ? 'text-green-900 font-medium' : 'text-gray-600'}`}>{aiResult.p1TargetAudience}</p>
+                  </div>
+                )}
+                {aiResult.p2TargetAudience && (
+                  <div className={`p-5 rounded-2xl border ${winnerId === 2 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-100'}`}>
+                    <div className={`text-[11px] font-black uppercase mb-2 line-clamp-1 ${winnerId === 2 ? 'text-green-600' : 'text-gray-500'}`}>{p2?.title || p2Name}</div>
+                    <p className={`text-sm leading-relaxed ${winnerId === 2 ? 'text-green-900 font-medium' : 'text-gray-600'}`}>{aiResult.p2TargetAudience}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* YAPAY ZEKA SONUÇ DEĞERLENDİRMESİ - Final Verdict */}
+          {renderVerdict()}
         </>
       )}
     </div>
