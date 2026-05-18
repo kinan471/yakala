@@ -19,6 +19,7 @@ export type Product = {
   rating: number;
   source_url: string;
   affiliate_link: string;
+  affiliate_url?: string; // Alias for affiliate_link
   source_platform: string;
   scarcity_level: number;
   social_proof_count: number;
