@@ -68,6 +68,29 @@ export default function ProductPage() {
     );
   }, [product]);
 
+  const savings = useMemo(() => {
+    if (!product) return 0;
+
+    return (
+      product.original_price -
+      product.current_price
+    );
+  }, [product]);
+
+  const scarcityPct = useMemo(() => {
+    if (!product) return 0;
+
+    return Math.max(
+      8,
+      Math.min(
+        100,
+        ((15 - product.scarcity_level) /
+          15) *
+          100
+      )
+    );
+  }, [product]);
+
   const deal = useMemo(() => {
     if (!product) return null;
     return computeDealScore(product);
