@@ -299,48 +299,78 @@ const ProductCard = memo(function ProductCard({
           </div>
         )}
 
-        {/* CTA */}
-        <div className="mt-auto flex gap-2 pt-2">
-          {/* Compare Button - shows text on all screens */}
-          <Link
-            href={`/compare?p1=${product.id}`}
-            className="
-              flex
-              h-12
-              flex-1
-              items-center
-              justify-center
-              rounded-2xl
-              border-2
-              border-gray-100
-              bg-white
-              text-xs
-              font-black
-              text-gray-700
-              transition-all duration-300
-              hover:border-orange-500
-              hover:bg-orange-50
-              hover:text-orange-600
-              active:scale-95
-            "
-          >
-            Karşılaştır
-          </Link>
+        {/* ACTION BUTTONS - 3 buttons with new layout */}
+        <div className="mt-auto grid grid-cols-3 gap-2 pt-2">
+          {/* Right column: Details and Compare buttons stacked */}
+          <div className="col-span-1 flex flex-col gap-2">
+            {/* Details Button */}
+            <Link
+              href={`/product/${product.id}`}
+              className="
+                flex
+                h-10
+                items-center
+                justify-center
+                rounded-xl
+                border-2
+                border-gray-100
+                bg-white
+                text-[10px]
+                font-black
+                text-gray-700
+                transition-all duration-300
+                hover:border-blue-500
+                hover:bg-blue-50
+                hover:text-blue-600
+                active:scale-95
+              "
+            >
+              تفاصيل
+            </Link>
 
-          {/* CTA BUTTON */}
+            {/* Compare Button */}
+            <Link
+              href={`/compare?p1=${product.id}`}
+              className="
+                flex
+                h-10
+                items-center
+                justify-center
+                rounded-xl
+                border-2
+                border-gray-100
+                bg-white
+                text-[10px]
+                font-black
+                text-gray-700
+                transition-all duration-300
+                hover:border-purple-500
+                hover:bg-purple-50
+                hover:text-purple-600
+                active:scale-95
+              "
+            >
+              مقارنة
+            </Link>
+          </div>
+
+          {/* Left column: Yakala button (affiliate link) */}
           <Link
-            href={`/product/${product.id}`}
+            href={product.affiliate_url || product.affiliate_link || `/product/${product.id}`}
+            target={(product.affiliate_url || product.affiliate_link) ? "_blank" : "_self"}
+            rel={(product.affiliate_url || product.affiliate_link) ? "noopener noreferrer" : undefined}
             className="
+              col-span-2
               relative
               overflow-hidden
-              flex-[1.5]
-              h-12
+              flex
+              items-center
+              justify-center
               rounded-2xl
               bg-gradient-to-r
               from-orange-500
               via-orange-600
               to-red-500
-              px-4
               text-white
               shadow-[0_12px_30px_rgba(249,115,22,.30)]
               transition-all
@@ -348,13 +378,10 @@ const ProductCard = memo(function ProductCard({
               hover:scale-[1.02]
               hover:shadow-[0_18px_40px_rgba(249,115,22,.45)]
               active:scale-95
-              flex
-              items-center
-              justify-center
             "
           >
             <span className="relative z-10 flex items-center gap-2 text-sm font-black">
-              YAKALA
+              🎯 YAKALA
             </span>
 
             {/* shine animation */}
